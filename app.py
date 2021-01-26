@@ -8,7 +8,10 @@ app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 #database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://localhost/testing'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://localhost/wutang'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://localhost/testing'  #works kindof
+
+
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://user:password@host:port/dbname'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'SQLITE:///' + os.path.join(basedir, 'db.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -28,7 +31,7 @@ class Product(db.Model):
     qty = db.Column(db.Integer)
     def __init__(self, name, description, price, qty):
         self.name = name
-        self.description = descriptionse
+        self.description = description
         self.price = price
         self.qty = qty
 
@@ -39,11 +42,42 @@ class ProductSchema(ma.Schema):
 
 # init schema
 product_schema = ProductSchema() #strict=True?
-products_schema = ProductSchema(many=True,) #strict=True?
+products_schema = ProductSchema(many=True) #strict=True?
 
 @app.route('/', methods=['GET'])
 def get():
     return jsonify({'big': 'small'})
+
+@app.route('/product', methods=['POST'])
+def add_product():
+    name = request.json['name']
+    description = request.json['description']
+    price = request.json['price']
+    qty = request.json['qty']
+
+    new_product = Product(name, description, price, qty)
+
+    db.session.add(new_product)
+    db.session.commit()
+
+    return product_schema.jsonify(new_product)
+
+# get all products
+@app.route('/product', methods=['GET'])
+def get_products():
+    all_products = Product.query.all()
+    result = products_schema.dump(all_products)
+    return jsonify(result)
+    # return jsonify(result.data)
+
+# get one product
+@app.route('/product/<id>', methods=['GET'])
+def get_product():
+    all_products = Product.query.all()
+    result = products_schema.dump(all_products)
+    print('your result: ', result)
+    return jsonify(result)
+    # return jsonify(result.data)
 
 # Run Server
 if __name__ == '__main__':
