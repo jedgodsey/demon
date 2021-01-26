@@ -9,11 +9,6 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 #database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://localhost/wutang'
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://localhost/testing'  #works kindof
-
-
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://user:password@host:port/dbname'
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'SQLITE:///' + os.path.join(basedir, 'db.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Init DB
@@ -78,27 +73,20 @@ def get_product(id):
 @app.route('/product/<id>', methods=['PUT'])
 def update_product(id):
     product = Product.query.get(id)
-    print('here one')
-
     name = request.json['name']
     description = request.json['description']
     price = request.json['price']
     qty = request.json['qty']
-    print('here two')
 
     product.name = name
     product.description = description
     product.price = price
     product.qty = qty
-    print('here three')
-
     db.session.commit()
-    print('here four')
-
     return product_schema.jsonify(product)
 
 # delete
-@app.route('/poduct/<id>', methods=['DELETE'])
+@app.route('/product/<id>', methods=['DELETE'])
 def delete_product(id):
     product = Product.query.get(id)
     db.session.delete(product)
